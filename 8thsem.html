@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Coffee Vending Machine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('cfe.jpg'); /* Replace with your watermark image URL */
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center center; /* Center the background image */
+            opacity: 0.9; /* Adjust opacity as needed */
+        }
+	 {
+            font-family: Arial, sans-serif;
+            background-color: #F5F5F5;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #8B0000;
+            margin-bottom: 30px;
+        }
+        .container {
+            background-color: #FFF;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #8B0000;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #8B0000;
+            color: #FFFFFF;
+        }
+        button {
+            background-color: #8B0000;
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #FF4500;
+        }
+        form {
+            text-align: center;
+            margin-top: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        input[type="text"],
+        select,
+        input[type="number"] {
+            padding: 8px;
+            width: 100%;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+            font-size: 18px;
+        }
+        #btn_submit {
+            font-size: 24px;
+        }
+        #time {
+            font-size: 72px;
+            color: #8B0000;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+        /* Additional CSS3 styles */
+        .jumbotron {
+            background-image: url('https://example.com/your-background-image.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            color: #FFFFFF;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="text-center">Smart Coffee Vending Machine </h1>
+        </div>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Coffee</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><b>coffee1</b></td>
+                    <td><b>Rs30.00</b></td>
+                </tr>
+                <tr>
+                    <td><b>coffee2</b></td>
+                    <td><b>Rs40.00</b></td>
+                </tr>
+                            </tbody>
+        </table>
+        <form id="orderForm">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" name="name">
+            </div>
+            <div class="form-group">
+                <label for="coffee">Coffee:</label>
+                <select class="form-control" id="coffee" name="coffee">
+                    <option value="coffee1">coffee1</option>
+                    <option value="coffee2">coffee2</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" min="1" max="10">
+            </div>
+            <button type="button" class="btn btn-danger" onclick="orderNow()" id="btn_submit">Order Now</button>
+            <div><span id="time" class="display-1"></span> Seconds!</div>
+        </form>
+    </div>
+
+    <script>
+        function orderNow() {
+            var name = document.getElementById("name").value;
+            var coffee = document.getElementById("coffee").value;
+            var quantity = document.getElementById("quantity").value;
+
+            // Validate input
+            if (name === "") {
+                alert("Please enter your name.");
+                return;
+            }
+            if (quantity === "" || quantity <= 0 || quantity > 10) {
+                alert("Please enter a valid quantity between 1 and 10.");
+                return;
+            }
+
+            // Send order details to ESP8266
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    alert("Order received. Thank you!");
+                }
+            };
+            xhttp.open("GET", "http://<esp8266_ip_address>/order?name=" + name + "&coffee=" + coffee + "&quantity=" + quantity, true);
+            xhttp.send();
+        }
+
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = seconds;
+
+                if (--timer < 0) {
+                    timer = duration;
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            var fiveMinutes = 60 * 5,
+                display = document.querySelector('#time');
+            startTimer(fiveMinutes, display);
+        };
+    </script>
+    <!-- Add Bootstrap and jQuery JavaScript libraries for Bootstrap functionality -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
